@@ -1,0 +1,3 @@
+name: neutron-recursive-dns
+summary: Interface for integrating BIND with Neutron OVS and Gateways
+maintainer: OpenStack Charmers <openstack-dev@lists.openstack.org>

@@ -1,0 +1,67 @@
+{% if options.allowed_nets -%}
+acl allow_query {
+        {{ options.allowed_nets }};
+};
+{%- endif %}
+
+{% if options.allowed_recursion_nets -%}
+acl allow_recursion {
+        {{ options.allowed_recursion_nets }};
+};
+{%- endif %}
+
+options {
+        directory "/var/cache/bind";
+
+        // If there is a firewall between you and nameservers you want
+        // to talk to, you may need to fix the firewall to allow multiple
+        // ports to talk.  See http://www.kb.cert.org/vuls/id/800113
+
+        // If your ISP provided one or more IP addresses for stable 
+        // nameservers, you probably want to use them as forwarders.  
+        // Uncomment the following block, and insert the addresses replacing 
+        // the all-0's placeholder.
+
+        {% if options.forwarders -%}
+        forwarders {
+            {{ options.forwarders }};
+        };
+        forward only;
+        {%- endif %}
+
+        //========================================================================
+        // If BIND logs error messages about the root key being expired,
+        // you will need to update your keys.  See https://www.isc.org/bind-keys
+        //========================================================================
+        {% if options.disable_dnssec_validation -%}
+        dnssec-validation no;
+        {%- else -%}
+        dnssec-validation auto;
+        {%- endif %}
+
+        auth-nxdomain no;    # conform to RFC1035
+        listen-on-v6 { any; };
+        allow-new-zones yes;
+        request-ixfr no;
+        {% if options.forwarders or options.recursion -%}
+        recursion yes;
+
+        {% if options.allowed_recursion_nets -%}
+        allow-recursion { allow_recursion; };
+        {% elif options.allowed_nets -%}
+        allow-recursion { allow_query; };
+        {% else -%}
+        allow-recursion { any; };
+        {% endif -%}
+
+        {% else -%}
+        recursion no;
+        {% endif -%}
+
+        statistics-file "/var/cache/bind/named.stats";
+        zone-statistics yes;
+        allow-notify { {{ dns_backend.control_ips }}; };
+        {% if options.allowed_nets -%}
+        allow-query { allow_query; };
+        {%- endif %}
+};
