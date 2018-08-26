@@ -6,8 +6,8 @@ cd designate-bind/
 tox -e build
 cd ..
 
-mkdir designate-bind/build/builds/designate-bind/hooks/relations/neutron-recursive-dns/
-cp -r interface-neutron-recursive-dns/* designate-bind/build/builds/designate-bind/hooks/relations/neutron-recursive-dns/
+# mkdir designate-bind/build/builds/designate-bind/hooks/relations/neutron-recursive-dns/
+# cp -r interface-neutron-recursive-dns/* designate-bind/build/builds/designate-bind/hooks/relations/neutron-recursive-dns/
 
 cp designate-bind/build/builds/designate-bind/hooks/dns-backend-relation-changed designate-bind/build/builds/designate-bind/hooks/neutron-recursive-dns-broken
 cp designate-bind/build/builds/designate-bind/hooks/dns-backend-relation-changed designate-bind/build/builds/designate-bind/hooks/neutron-recursive-dns-joined
