@@ -5,6 +5,7 @@ from charmhelpers.core.hookenv import (
     log, ERROR,
     config,
     relation_ids,
+    local_unit,
     relation_get,
     unit_get,
     network_get_primary_address,
@@ -84,18 +85,22 @@ class L3AgentContext(OSContextGenerator):
 
 def config_get_dns_servers(config_dns='dns-servers'):
     result = config(config_dns)
+    first = False
     if result == None:
         result = ""
-    first = True
+        first = True
+    log("config_get_dns_servers relation_ids: {}".format(relation_ids('neutron-recursive-dns')))
     for relid in relation_ids('neutron-recursive-dns'):
-        reldata = relation_get(rid=relid)
+        reldata = relation_get(rid=relid,unit=local_unit())
+        log("config_get_dns_servers relation data: {}".format(reldata))
         if reldata != None:
-            if not first:
-                result += ","
-            else:
-                first = False
-            # returns empty string if not recursive_ip present
-            result += relation_get(rid=relid).get('recursive_ip',"")
+            # returns empty string if no ingress-address present
+            if reldata.get('ingress-address',"") != None:
+                if not first:
+                    result += ","
+                else:
+                    first = False
+                result += reldata.get('ingress-address',"")
     log("config_get_dns_servers result is: {}".format(result))
     if not result:
         return None
